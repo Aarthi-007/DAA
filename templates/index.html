@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Algorithm Time Complexity Visualizer</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}" />
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ── Header ──────────────────────────────────────────────── -->
+  <header>
+    <div class="header-text">
+      <h1>Algorithm <span>Time Complexity</span> Visualizer</h1>
+      <p>Visualize and compare how algorithms scale with input size.</p>
+    </div>
+    <div class="header-controls">
+      <button class="btn" id="themeBtn">☀ Light</button>
+      <button class="btn" id="exportBtn">↓ Export PNG</button>
+      <button class="btn btn-accent" id="resetBtn">↺ Reset</button>
+    </div>
+  </header>
+
+  <!-- ── Controls Panel ──────────────────────────────────────── -->
+  <div class="glass controls-panel">
+    <!-- Slider + display -->
+    <div class="slider-group">
+      <span class="slider-label">Input Size (n)</span>
+      <div class="slider-value-row">
+        <span class="n-display" id="nDisplay">100</span>
+        <span class="n-label">n</span>
+      </div>
+      <input type="range" id="slider" min="1" max="1000" value="100" />
+    </div>
+
+    <!-- Manual entry -->
+    <div class="manual-input-group">
+      <label for="nInput">Manual Input</label>
+      <input type="number" id="nInput" min="1" max="1000" value="100" />
+    </div>
+
+    <!-- Toggles -->
+    <div class="toggles-group">
+      <label>Show / Hide</label>
+      <label class="toggle-item">
+        <input type="checkbox" id="chk-o1" checked style="--c-current:#10b981" />
+        <span style="color:#10b981">O(1)</span>
+      </label>
+      <label class="toggle-item">
+        <input type="checkbox" id="chk-olog" checked style="--c-current:#38bdf8" />
+        <span style="color:#38bdf8">O(log n)</span>
+      </label>
+      <label class="toggle-item">
+        <input type="checkbox" id="chk-on" checked style="--c-current:#a78bfa" />
+        <span style="color:#a78bfa">O(n)</span>
+      </label>
+      <label class="toggle-item">
+        <input type="checkbox" id="chk-onlog" checked style="--c-current:#fb923c" />
+        <span style="color:#fb923c">O(n log n)</span>
+      </label>
+      <label class="toggle-item">
+        <input type="checkbox" id="chk-on2" checked style="--c-current:#f43f5e" />
+        <span style="color:#f43f5e">O(n²)</span>
+      </label>
+    </div>
+  </div>
+
+  <!-- ── Chart ───────────────────────────────────────────────── -->
+  <div class="glass chart-section">
+    <div class="section-title">Growth Curves</div>
+    <div class="chart-container">
+      <canvas id="complexityChart"></canvas>
+    </div>
+  </div>
+
+  <!-- ── Table + Growth Bars ─────────────────────────────────── -->
+  <div class="two-col">
+
+    <!-- Value Table -->
+    <div class="glass value-table-panel">
+      <div class="section-title">Current Values at n</div>
+      <table>
+        <thead>
+          <tr>
+            <th>Complexity</th>
+            <th style="text-align:right">Operations</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="complexity-badge">
+              <span class="dot" style="background:#10b981"></span>O(1)
+            </td>
+            <td class="value-cell" id="val-o1">—</td>
+          </tr>
+          <tr>
+            <td class="complexity-badge">
+              <span class="dot" style="background:#38bdf8"></span>O(log n)
+            </td>
+            <td class="value-cell" id="val-olog">—</td>
+          </tr>
+          <tr>
+            <td class="complexity-badge">
+              <span class="dot" style="background:#a78bfa"></span>O(n)
+            </td>
+            <td class="value-cell" id="val-on">—</td>
+          </tr>
+          <tr>
+            <td class="complexity-badge">
+              <span class="dot" style="background:#fb923c"></span>O(n log n)
+            </td>
+            <td class="value-cell" id="val-onlog">—</td>
+          </tr>
+          <tr>
+            <td class="complexity-badge">
+              <span class="dot" style="background:#f43f5e"></span>O(n²)
+            </td>
+            <td class="value-cell" id="val-on2">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Growth Bars -->
+    <div class="glass growth-panel">
+      <div class="section-title">Relative Growth</div>
+
+      <div class="bar-row">
+        <span class="bar-label" style="color:#10b981">O(1)</span>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-o1-fill" style="background:#10b981"></div>
+        </div>
+        <span class="bar-value" id="bar-o1-val">—</span>
+      </div>
+
+      <div class="bar-row">
+        <span class="bar-label" style="color:#38bdf8">O(log n)</span>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-olog-fill" style="background:#38bdf8"></div>
+        </div>
+        <span class="bar-value" id="bar-olog-val">—</span>
+      </div>
+
+      <div class="bar-row">
+        <span class="bar-label" style="color:#a78bfa">O(n)</span>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-on-fill" style="background:#a78bfa"></div>
+        </div>
+        <span class="bar-value" id="bar-on-val">—</span>
+      </div>
+
+      <div class="bar-row">
+        <span class="bar-label" style="color:#fb923c">O(n log n)</span>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-onlog-fill" style="background:#fb923c"></div>
+        </div>
+        <span class="bar-value" id="bar-onlog-val">—</span>
+      </div>
+
+      <div class="bar-row">
+        <span class="bar-label" style="color:#f43f5e">O(n²)</span>
+        <div class="bar-track">
+          <div class="bar-fill" id="bar-on2-fill" style="background:#f43f5e"></div>
+        </div>
+        <span class="bar-value" id="bar-on2-val">—</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Complexity Cards ─────────────────────────────────────── -->
+  <div class="cards-section">
+    <div class="section-title" style="margin-bottom:16px">Complexity Classes</div>
+    <div class="cards-grid">
+
+      <div class="complexity-card" style="border-color:rgba(16,185,129,0.25)">
+        <div class="card-notation" style="color:#10b981">O(1)</div>
+        <div class="card-title">Constant Time</div>
+        <div class="card-desc">Performance stays the same regardless of input size.</div>
+      </div>
+
+      <div class="complexity-card" style="border-color:rgba(56,189,248,0.25)">
+        <div class="card-notation" style="color:#38bdf8">O(log n)</div>
+        <div class="card-title">Logarithmic Time</div>
+        <div class="card-desc">Input halves at each step. Common in Binary Search.</div>
+      </div>
+
+      <div class="complexity-card" style="border-color:rgba(167,139,250,0.25)">
+        <div class="card-notation" style="color:#a78bfa">O(n)</div>
+        <div class="card-title">Linear Time</div>
+        <div class="card-desc">Every element is visited once. Scales directly with input.</div>
+      </div>
+
+      <div class="complexity-card" style="border-color:rgba(251,146,60,0.25)">
+        <div class="card-notation" style="color:#fb923c">O(n log n)</div>
+        <div class="card-title">Linearithmic Time</div>
+        <div class="card-desc">Divide-and-conquer strategies. Merge Sort, Heap Sort.</div>
+      </div>
+
+      <div class="complexity-card" style="border-color:rgba(244,63,94,0.25)">
+        <div class="card-notation" style="color:#f43f5e">O(n²)</div>
+        <div class="card-title">Quadratic Time</div>
+        <div class="card-desc">Nested iterations over input. Bubble Sort, Selection Sort.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Algorithm Examples ──────────────────────────────────── -->
+  <div class="glass algo-section">
+    <div class="section-title">Algorithm Examples</div>
+    <table class="algo-table">
+      <thead>
+        <tr>
+          <th>Complexity</th>
+          <th>Example Algorithms</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span style="color:#10b981;font-family:var(--font-mono)">O(1)</span></td>
+          <td>
+            <span class="algo-badge">Array access</span>
+            <span class="algo-badge">Hash lookup</span>
+            <span class="algo-badge">Stack push/pop</span>
+          </td>
+        </tr>
+        <tr>
+          <td><span style="color:#38bdf8;font-family:var(--font-mono)">O(log n)</span></td>
+          <td>
+            <span class="algo-badge">Binary Search</span>
+            <span class="algo-badge">BST operations</span>
+            <span class="algo-badge">Exponentiation by squaring</span>
+          </td>
+        </tr>
+        <tr>
+          <td><span style="color:#a78bfa;font-family:var(--font-mono)">O(n)</span></td>
+          <td>
+            <span class="algo-badge">Linear Search</span>
+            <span class="algo-badge">Array traversal</span>
+            <span class="algo-badge">Find min/max</span>
+          </td>
+        </tr>
+        <tr>
+          <td><span style="color:#fb923c;font-family:var(--font-mono)">O(n log n)</span></td>
+          <td>
+            <span class="algo-badge">Merge Sort</span>
+            <span class="algo-badge">Heap Sort</span>
+            <span class="algo-badge">Quick Sort (avg)</span>
+          </td>
+        </tr>
+        <tr>
+          <td><span style="color:#f43f5e;font-family:var(--font-mono)">O(n²)</span></td>
+          <td>
+            <span class="algo-badge">Bubble Sort</span>
+            <span class="algo-badge">Selection Sort</span>
+            <span class="algo-badge">Insertion Sort</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ── Educational Section ─────────────────────────────────── -->
+  <div class="glass edu-section">
+    <div class="section-title">What is Big-O Notation?</div>
+    <div class="edu-grid">
+      <div class="edu-block">
+        <h3>Definition</h3>
+        <p>Big-O notation describes the <em>upper bound</em> of an algorithm's running time as input size grows toward infinity. It tells you the worst-case scenario — how slow can this get?</p>
+      </div>
+      <div class="edu-block">
+        <h3>Why it matters</h3>
+        <ul>
+          <li>Predict how code behaves at scale</li>
+          <li>Compare competing solutions objectively</li>
+          <li>Optimize bottlenecks before they hurt</li>
+          <li>Pass technical interviews confidently</li>
+        </ul>
+      </div>
+      <div class="edu-block">
+        <h3>Key rules</h3>
+        <ul>
+          <li>Drop constant multipliers: O(3n) → O(n)</li>
+          <li>Keep the dominant term: O(n² + n) → O(n²)</li>
+          <li>Nested loops multiply: O(n) × O(n) = O(n²)</li>
+          <li>Sequential blocks add: O(n) + O(n) = O(n)</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Footer ──────────────────────────────────────────────── -->
+  <footer>
+    Algorithm Time Complexity Visualizer &nbsp;·&nbsp; Built with Flask &amp; Chart.js
+  </footer>
+
+</div><!-- /container -->
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
